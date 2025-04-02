@@ -6,6 +6,7 @@ class LotteryPredictor {
     this.analyze();
   }
 
+  // Le reste de la classe LotteryPredictor reste inchangé...
   findMaxNumber() {
     // Trouver le numéro maximum dans l'historique pour déterminer la plage
     let max = 0;
@@ -189,6 +190,43 @@ class LotteryPredictor {
   }
 }
 
+// Fonction pour analyser le CSV et extraire les données
+function parseCSV(csvText) {
+  // Diviser par lignes
+  const lines = csvText.split('\n');
+  // Ignorer la première ligne si c'est un en-tête
+  const startIndex = lines[0].includes('date') || lines[0].includes('numéros') ? 1 : 0;
+  
+  const drawData = [];
+  
+  for (let i = startIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue; // Ignorer les lignes vides
+    
+    // Diviser la ligne en colonnes
+    const columns = line.split(',').map(col => col.trim());
+    
+    // Extraire les numéros du tirage (adapter selon le format de votre CSV)
+    // Cette partie doit être ajustée selon la structure de votre CSV
+    const numbers = [];
+    
+    // Supposons que les colonnes contenant les numéros commencent à l'index 1 
+    // (si la première colonne est une date ou un identifiant)
+    for (let j = 1; j < columns.length; j++) {
+      const num = parseInt(columns[j]);
+      if (!isNaN(num)) {
+        numbers.push(num);
+      }
+    }
+    
+    if (numbers.length > 0) {
+      drawData.push(numbers);
+    }
+  }
+  
+  return drawData;
+}
+
 // Exemple d'utilisation sur téléphone mobile
 function initializeApp() {
   // Interface utilisateur
@@ -201,7 +239,7 @@ function initializeApp() {
       // Charger les données historiques (à implémenter selon votre stockage)
       this.loadHistoricalData();
       
-      // Initialiser le prédicteur
+      // Initialiser le prédicteur si des données sont déjà présentes
       if (this.historicalData.length > 0) {
         this.predictor = new LotteryPredictor(this.historicalData);
         this.displayPredictions();
@@ -215,6 +253,57 @@ function initializeApp() {
       document.getElementById('add-draw-button').addEventListener('click', () => {
         this.addNewDraw();
       });
+      
+      // Ajouter un gestionnaire pour le chargement de fichier CSV
+      const csvFileInput = document.getElementById('csv-file-input');
+      if (csvFileInput) {
+        csvFileInput.addEventListener('change', (event) => {
+          this.handleCSVUpload(event);
+        });
+      }
+      
+      // Ajouter un gestionnaire pour le bouton de chargement CSV
+      const loadCSVButton = document.getElementById('load-csv-button');
+      if (loadCSVButton) {
+        loadCSVButton.addEventListener('click', () => {
+          document.getElementById('csv-file-input').click();
+        });
+      }
+    },
+    
+    // Gérer le téléchargement du fichier CSV
+    handleCSVUpload: function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvContent = e.target.result;
+        const parsedData = parseCSV(csvContent);
+        
+        if (parsedData.length > 0) {
+          // Remplacer ou ajouter aux données existantes
+          const appendData = confirm("Ajouter à l'historique existant ? Annuler pour remplacer complètement.");
+          
+          if (appendData) {
+            this.historicalData = this.historicalData.concat(parsedData);
+          } else {
+            this.historicalData = parsedData;
+          }
+          
+          this.saveHistoricalData();
+          
+          // Réinitialiser le prédicteur avec les nouvelles données
+          this.predictor = new LotteryPredictor(this.historicalData);
+          this.displayPredictions();
+          
+          alert(`${parsedData.length} tirages chargés avec succès.`);
+        } else {
+          alert("Aucune donnée valide n'a été trouvée dans le fichier CSV.");
+        }
+      };
+      
+      reader.readAsText(file);
     },
     
     // Charger les données historiques depuis le stockage local
@@ -232,6 +321,17 @@ function initializeApp() {
     
     // Afficher les prédictions
     displayPredictions: function() {
+      // S'assurer que le prédicteur est initialisé
+      if (!this.predictor && this.historicalData.length > 0) {
+        this.predictor = new LotteryPredictor(this.historicalData);
+      }
+      
+      if (!this.predictor) {
+        document.getElementById('predictions-results').innerHTML = 
+          '<p>Aucune donnée historique disponible. Veuillez charger un fichier CSV ou ajouter des tirages manuellement.</p>';
+        return;
+      }
+      
       // Obtenir le dernier tirage pour l'affinité
       const lastDraw = this.historicalData.length > 0 ? 
         this.historicalData[this.historicalData.length - 1] : null;
@@ -261,6 +361,14 @@ function initializeApp() {
         
         resultsContainer.appendChild(predictionElement);
       }
+      
+      // Afficher des statistiques générales
+      resultsContainer.innerHTML += `
+        <div class="stats-summary">
+          <h3>Statistiques</h3>
+          <p>Nombre total de tirages analysés: ${this.historicalData.length}</p>
+        </div>
+      `;
     },
     
     // Ajouter un nouveau tirage
