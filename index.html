@@ -128,7 +128,13 @@
         <label for="num-predictions">Nombre de numéros à prédire :</label>
         <input type="number" id="num-predictions" min="1" max="20" value="10">
       </div>
-      
+      <!-- Avant l'élément avec id "predict-button" ou dans la section appropriée -->
+<div class="form-group">
+  <h3>Charger l'historique des tirages</h3>
+  <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
+  <button id="load-csv-button" class="btn">Charger un fichier CSV</button>
+  <p class="help-text">Le fichier CSV doit contenir un tirage par ligne avec les numéros séparés par des virgules.</p>
+</div>
       <button id="predict-button">Obtenir les prédictions</button>
       
       <h2>Résultats</h2>
