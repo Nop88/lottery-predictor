@@ -235,9 +235,9 @@ function initializeApp() {
     historicalData: [],
     
     // Initialisation
-    init: function() {
+    init: async function() {
       // Charger les données historiques (à implémenter selon votre stockage)
-      this.loadHistoricalData();
+      await this.loadHistoricalData();
       
       // Initialiser le prédicteur si des données sont déjà présentes
       if (this.historicalData.length > 0) {
@@ -306,13 +306,65 @@ function initializeApp() {
       reader.readAsText(file);
     },
     
-    // Charger les données historiques depuis le stockage local
-    loadHistoricalData: function() {
-      const savedData = localStorage.getItem('lotteryData');
-      if (savedData) {
-        this.historicalData = JSON.parse(savedData);
+    // Nouvelle fonction pour charger le CSV
+   loadCSVData: async function() {
+  try {
+    const response = await fetch('./statistics.csv');
+    const csvText = await response.text();
+    
+    const results = Papa.parse(csvText, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true
+    });
+    
+    // Convertir les données CSV au format attendu par votre classe
+    const historicalData = [];
+    
+    results.data.forEach(row => {
+      if (row.date) { // Vérifier que la ligne n'est pas vide
+        const numbers = [
+          row['Numéro 1'],
+          row['Numéro 2'], 
+          row['Numéro 3'],
+          row['Numéro 4'],
+          row['Numéro 5']
+        ].filter(num => num && !isNaN(num));
+        
+        const stars = [
+          row['Etoile 1'],
+          row['Etoile 2']
+        ].filter(star => star && !isNaN(star));
+        
+        // Combiner numéros et étoiles (ou gardez séparés selon vos besoins)
+        historicalData.push([...numbers, ...stars]);
       }
-    },
+    });
+    
+    return historicalData;
+    
+  } catch (error) {
+    console.error('Erreur de chargement CSV:', error);
+    return [];
+  }
+},
+
+// Fonction modifiée pour charger les données
+loadHistoricalData: async function() {
+  // D'abord essayer de charger le CSV
+  const csvData = await this.loadCSVData();
+  
+  if (csvData.length > 0) {
+    this.historicalData = csvData;
+    console.log('Données CSV chargées:', csvData.length, 'tirages');
+  } else {
+    // Fallback vers localStorage si CSV non disponible
+    const savedData = localStorage.getItem('lotteryData');
+    if (savedData) {
+      this.historicalData = JSON.parse(savedData);
+    }
+  }
+},
     
     // Sauvegarder les données historiques
     saveHistoricalData: function() {
