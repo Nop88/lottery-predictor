@@ -96,14 +96,48 @@ class LotteryPredictor {
         return positionPreference;
     }
 
-    predict(numbersToPredict, lastDraw = null) {
+predict(numbersToPredict, lastDraw = null) {
+        // Calculer les scores bruts pour chaque facteur
+        const overdueRaw = {};
+        const affinityRaw = {};
+        const frequencyRaw = {};
+        const positionalRaw = {};
+
+        for (let number = 1; number <= this.maxNumber; number++) {
+            overdueRaw[number] = this.calculateOverdueScore(number);
+            affinityRaw[number] = this.calculateAffinityScore(number, lastDraw);
+            frequencyRaw[number] = this.calculateFrequencyScore(number);
+            positionalRaw[number] = this.calculatePositionalScore(number);
+        }
+
+        // Normaliser chaque facteur sur une échelle 0-100.
+        // Sans ça, un facteur à forte variance (le retard) écrase les autres
+        // même s'il ne pèse "que" 35% dans la formule finale.
+        const normalize = (raw) => {
+            const values = Object.values(raw);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+            const normalized = {};
+            for (const key in raw) {
+                normalized[key] = range === 0 ? 50 : ((raw[key] - min) / range) * 100;
+            }
+            return normalized;
+        };
+
+        const overdueNorm = normalize(overdueRaw);
+        const affinityNorm = normalize(affinityRaw);
+        const frequencyNorm = normalize(frequencyRaw);
+        const positionalNorm = normalize(positionalRaw);
+
+        // Combiner les scores normalisés avec les pondérations
         const scores = {};
         for (let number = 1; number <= this.maxNumber; number++) {
-            const overdueScore = this.calculateOverdueScore(number) * 0.35;
-            const affinityScore = this.calculateAffinityScore(number, lastDraw) * 0.25;
-            const frequencyScore = this.calculateFrequencyScore(number) * 0.25;
-            const positionalScore = this.calculatePositionalScore(number) * 0.15;
-            scores[number] = overdueScore + affinityScore + frequencyScore + positionalScore;
+            scores[number] =
+                overdueNorm[number] * 0.35 +
+                affinityNorm[number] * 0.25 +
+                frequencyNorm[number] * 0.25 +
+                positionalNorm[number] * 0.15;
         }
 
         const sortedNumbers = Object.keys(scores)
