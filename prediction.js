@@ -83,8 +83,20 @@ class LotteryPredictor {
     }
 
     calculateFrequencyScore(number) {
+        // Calculer un score basé sur la fréquence d'apparition globale
         const frequency = this.statistics[number].occurrences / this.historicalData.length * 100;
-        const idealFrequency = 100 / this.maxNumber;
+
+        // Nombre moyen de numéros tirés à chaque tirage (5 pour des numéros
+        // principaux type EuroMillions, 2 pour des étoiles, etc.)
+        const avgDrawSize = this.historicalData.length > 0
+            ? this.historicalData.reduce((sum, draw) => sum + draw.length, 0) / this.historicalData.length
+            : 1;
+
+        // La fréquence idéale dépend de combien de numéros sont tirés à chaque fois,
+        // pas seulement de la plage totale de numéros possibles
+        const idealFrequency = (avgDrawSize / this.maxNumber) * 100;
+
+        // Donner un score élevé aux numéros qui sont proches de leur fréquence idéale
         return 100 - Math.abs(frequency - idealFrequency) * 3;
     }
 
@@ -96,7 +108,7 @@ class LotteryPredictor {
         return positionPreference;
     }
 
-predict(numbersToPredict, lastDraw = null) {
+    predict(numbersToPredict, lastDraw = null) {
         // Calculer les scores bruts pour chaque facteur
         const overdueRaw = {};
         const affinityRaw = {};
