@@ -122,9 +122,7 @@ class LotteryPredictor {
             positionalRaw[number] = this.calculatePositionalScore(number);
         }
 
-        // Normaliser chaque facteur sur une échelle 0-100.
-        // Sans ça, un facteur à forte variance (le retard) écrase les autres
-        // même s'il ne pèse "que" 35% dans la formule finale.
+        // Normaliser chaque facteur sur une échelle 0-100
         const normalize = (raw) => {
             const values = Object.values(raw);
             const min = Math.min(...values);
@@ -156,9 +154,37 @@ class LotteryPredictor {
             .map(number => parseInt(number))
             .sort((a, b) => scores[b] - scores[a]);
 
+        // Au lieu de toujours prendre strictement le top N, on tire au sort
+        // parmi un bassin des meilleurs candidats, pondéré par leur score.
+        // -> Résultat différent à chaque clic, mais toujours influencé par
+        // les scores calculés (pas un pur hasard uniforme).
+        const poolSize = Math.min(this.maxNumber, numbersToPredict * 4);
+        const pool = sortedNumbers.slice(0, poolSize).map(n => ({
+            number: n,
+            weight: Math.max(scores[n], 0.01) // éviter un poids nul ou négatif
+        }));
+
+        const predictions = [];
+        for (let i = 0; i < numbersToPredict && pool.length > 0; i++) {
+            const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+            let r = Math.random() * totalWeight;
+            let chosenIndex = 0;
+            for (let j = 0; j < pool.length; j++) {
+                r -= pool[j].weight;
+                if (r <= 0) {
+                    chosenIndex = j;
+                    break;
+                }
+            }
+            predictions.push(pool[chosenIndex].number);
+            pool.splice(chosenIndex, 1);
+        }
+
+        predictions.sort((a, b) => a - b);
+
         return {
-            predictions: sortedNumbers.slice(0, numbersToPredict),
-            scores: sortedNumbers.slice(0, numbersToPredict).map(n => ({
+            predictions,
+            scores: predictions.map(n => ({
                 number: n,
                 score: scores[n].toFixed(2)
             }))
