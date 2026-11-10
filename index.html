@@ -1,210 +1,407 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prédicteur de Loterie</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #1a73e8;
-      margin-bottom: 20px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #1557b0;
-    }
-    .prediction-item {
-      background-color: #f0f7ff;
-      border-left: 4px solid #1a73e8;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-    }
-    .prediction-item h3 {
-      margin-top: 0;
-      color: #1a73e8;
-    }
-    .tabs {
-      display: flex;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
-    }
-    .tab {
-      padding: 10px 20px;
-      cursor: pointer;
-      background-color: #f5f5f5;
-      border: 1px solid #ddd;
-      border-bottom: none;
-      border-radius: 5px 5px 0 0;
-      margin-right: 5px;
-    }
-    .tab.active {
-      background-color: white;
-      border-bottom: 1px solid white;
-      position: relative;
-      bottom: -1px;
-    }
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .stats-table th, .stats-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    .stats-table th {
-      background-color: #f5f5f5;
-    }
-    .hot-numbers {
-      color: #e53935;
-    }
-    .cold-numbers {
-      color: #1565c0;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Prédicteur de Loterie</h1>
-    
-    <div class="tabs">
-      <div class="tab active" data-tab="predictions">Prédictions</div>
-      <div class="tab" data-tab="add-data">Ajouter un tirage</div>
-      <div class="tab" data-tab="statistics">Statistiques</div>
-    </div>
-    
-    <div class="tab-content active" id="predictions-tab">
-      <div class="form-group">
-        <label for="num-predictions">Nombre de numéros à prédire :</label>
-        <input type="number" id="num-predictions" min="1" max="20" value="10">
-      </div>
-      <!-- Avant l'élément avec id "predict-button" ou dans la section appropriée -->
-<div class="form-group">
-  <h3>Charger l'historique des tirages</h3>
-  <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
-  <button id="load-csv-button" class="btn">Charger un fichier CSV</button>
-  <p class="help-text">Le fichier CSV doit contenir un tirage par ligne avec les numéros séparés par des virgules.</p>
-</div>
-      <button id="predict-button">Obtenir les prédictions</button>
-      
-      <h2>Résultats</h2>
-      <div id="predictions-results">
-        <!-- Les résultats seront affichés ici -->
-      </div>
-    </div>
-    
-    <div class="tab-content" id="add-data-tab">
-      <div class="form-group">
-        <label for="new-draw-input">Entrez les numéros du dernier tirage (séparés par des virgules) :</label>
-        <input type="text" id="new-draw-input" placeholder="Ex: 7, 13, 24, 31, 42">
-      </div>
-      
-      <button id="add-draw-button">Ajouter ce tirage</button>
-      
-      <h2>Historique des tirages</h2>
-      <div id="draw-history">
-        <!-- L'historique sera affiché ici -->
-      </div>
-    </div>
-    
-    <div class="tab-content" id="statistics-tab">
-      <div class="form-group">
-        <label for="stats-filter">Afficher :</label>
-        <select id="stats-filter">
-          <option value="all">Tous les numéros</option>
-          <option value="hot">Numéros chauds (fréquents)</option>
-          <option value="cold">Numéros froids (rares)</option>
-          <option value="overdue">Numéros en retard</option>
-        </select>
-      </div>
-      
-      <table class="stats-table" id="stats-table">
-        <thead>
-          <tr>
-            <th>Numéro</th>
-            <th>Fréquence</th>
-            <th>Dernier tirage</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody id="stats-body">
-          <!-- Les statistiques seront affichées ici -->
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédicteur EuroMillions</title>
 
-  <script>
-    // Le code JavaScript sera ici - référez-vous à l'algorithme fourni
-    document.addEventListener('DOMContentLoaded', () => {
-      // Gestion des onglets
-      const tabs = document.querySelectorAll('.tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          // Désactiver tous les onglets
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          
-          // Activer l'onglet cliqué
-          tab.classList.add('active');
-          const tabId = tab.getAttribute('data-tab');
-          document.getElementById(`${tabId}-tab`).classList.add('active');
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 25px;
+            font-size: 1.25em;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #1557b0;
+        }
+
+        button.secondary {
+            background-color: #455a64;
+        }
+
+        button.secondary:hover {
+            background-color: #263238;
+        }
+
+        .prediction-item {
+            background-color: #f0f7ff;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 5px;
+        }
+
+        .prediction-item h3 {
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+
+        .prediction-numbers {
+            font-size: 1.5em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 8px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .help-text {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 2px;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            position: relative;
+            bottom: -1px;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 9px 7px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stats-table th {
+            background-color: #f5f5f5;
+        }
+
+        .hot-numbers {
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        .cold-numbers {
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .section-note {
+            background: #f7f7f7;
+            border-radius: 5px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
+            .tab {
+                padding: 9px 10px;
+                font-size: 0.9em;
+            }
+
+            .stats-table th,
+            .stats-table td {
+                padding: 7px 4px;
+                font-size: 0.85em;
+            }
+
+            .prediction-numbers {
+                font-size: 1.25em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Prédicteur EuroMillions</h1>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="predictions">
+                Prédictions
+            </div>
+
+            <div class="tab" data-tab="add-data">
+                Ajouter un tirage
+            </div>
+
+            <div class="tab" data-tab="statistics">
+                Statistiques
+            </div>
+        </div>
+
+        <!-- ONGLET PRÉDICTIONS -->
+        <div class="tab-content active" id="predictions-tab">
+
+            <div class="form-group">
+                <label for="num-predictions">
+                    Nombre de numéros à sélectionner :
+                </label>
+
+                <input
+                    type="number"
+                    id="num-predictions"
+                    min="1"
+                    max="20"
+                    value="10"
+                >
+
+                <p class="help-text">
+                    Ce nombre concerne les numéros principaux.
+                    Les étoiles sont toujours limitées à 2.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <h3>Charger l'historique des tirages</h3>
+
+                <input
+                    type="file"
+                    id="csv-file-input"
+                    accept=".csv,.txt"
+                    style="display: none;"
+                >
+
+                <button id="load-csv-button">
+                    Charger un fichier CSV
+                </button>
+
+                <p class="help-text">
+                    Le fichier doit contenir les colonnes
+                    « Numéro 1 » à « Numéro 5 » et
+                    « Etoile 1 », « Etoile 2 ».
+                    Le séparateur attendu est une tabulation.
+                </p>
+            </div>
+
+            <button id="predict-button">
+                Obtenir les prédictions
+            </button>
+
+            <h2>Résultats des trois méthodes</h2>
+
+            <div id="predictions-results">
+                Les prédictions apparaîtront ici.
+            </div>
+
+            <div class="section-note">
+                Les résultats sont des suggestions statistiques.
+                Les tirages EuroMillions restent indépendants :
+                aucune méthode ne permet de prédire les numéros gagnants.
+            </div>
+
+            <h2>Test des algorithmes</h2>
+
+            <p class="help-text">
+                Le backtest compare les méthodes sur les 100 derniers
+                tirages disponibles, en respectant leur ordre chronologique.
+            </p>
+
+            <button id="backtest-button" class="secondary">
+                Lancer le backtest
+            </button>
+
+            <div id="backtest-results"></div>
+        </div>
+
+
+        <!-- ONGLET AJOUT DE DONNÉES -->
+        <div class="tab-content" id="add-data-tab">
+
+            <div class="form-group">
+                <label for="new-draw-input">
+                    Dernier tirage (5 numéros, puis éventuellement 2 étoiles) :
+                </label>
+
+                <input
+                    type="text"
+                    id="new-draw-input"
+                    placeholder="Ex : 7, 13, 24, 31, 42, 2, 9"
+                >
+
+                <p class="help-text">
+                    Numéros principaux : 1 à 50.
+                    Étoiles : 1 à 12.
+                </p>
+            </div>
+
+            <button id="add-draw-button">
+                Ajouter ce tirage
+            </button>
+
+            <h2>Historique des tirages</h2>
+
+            <div id="draw-history">
+                <p class="help-text">
+                    Les données sont conservées dans le navigateur.
+                </p>
+            </div>
+        </div>
+
+
+        <!-- ONGLET STATISTIQUES -->
+        <div class="tab-content" id="statistics-tab">
+
+            <div class="form-group">
+                <label for="stats-filter">Afficher :</label>
+
+                <select id="stats-filter">
+                    <option value="all">Tous les numéros</option>
+                    <option value="hot">Numéros les plus fréquents</option>
+                    <option value="cold">Numéros les moins fréquents</option>
+                    <option value="overdue">Numéros en retard</option>
+                </select>
+            </div>
+
+            <table class="stats-table" id="stats-table">
+                <thead>
+                    <tr>
+                        <th>Numéro</th>
+                        <th>Fréquence</th>
+                        <th>Dernier tirage</th>
+                        <th>Score retard</th>
+                    </tr>
+                </thead>
+
+                <tbody id="stats-body">
+                    <tr>
+                        <td colspan="4">Chargement des statistiques...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+    <!-- Bibliothèque CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <!-- Application -->
+    <script src="prediction.js"></script>
+
+    <!-- Gestion des onglets -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab')
+                        .forEach(item => item.classList.remove('active'));
+
+                    document.querySelectorAll('.tab-content')
+                        .forEach(item => item.classList.remove('active'));
+
+                    tab.classList.add('active');
+
+                    const tabId = tab.getAttribute('data-tab');
+
+                    document.getElementById(`${tabId}-tab`)
+                        .classList.add('active');
+                });
+            });
         });
-      });
-    });
-  </script>
-  
- <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src="prediction.js"></script>
+    </script>
+
 </body>
 </html>
