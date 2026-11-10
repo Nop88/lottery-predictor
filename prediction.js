@@ -216,7 +216,8 @@ function parseLotteryCSV(csvText) {
     const results = Papa.parse(csvText, {
         header: true,
         dynamicTyping: true,
-        skipEmptyLines: true
+        skipEmptyLines: true,
+        delimiter: "\t"
     });
 
     const mainData = [];
