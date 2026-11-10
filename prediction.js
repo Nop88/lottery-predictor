@@ -222,7 +222,7 @@ function parseLotteryCSV(csvText) {
     const mainData = [];
     const starsData = [];
 
-    results.data.forEach(row => {
+    results.data.slice().reverse().forEach(row => {
         const numbers = [
             row['Numéro 1'], row['Numéro 2'], row['Numéro 3'],
             row['Numéro 4'], row['Numéro 5']
