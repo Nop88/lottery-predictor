@@ -702,7 +702,19 @@ function initializeApp() {
         displayBacktest: function () {
             const container =
                 document.getElementById('backtest-results');
+    const selector =
+        document.getElementById('backtest-window-size');
 
+    const requestedSize = selector
+        ? parseInt(selector.value, 10)
+        : 100;
+
+    const allowedSizes = [100, 200, 300, 500];
+
+    const windowSize = allowedSizes.includes(requestedSize)
+        ? requestedSize
+        : 100;
+           
             if (this.historicalData.length <= 30) {
                 container.innerHTML =
                     '<p>Il faut au moins 31 tirages pour effectuer le backtest.</p>';
@@ -710,12 +722,12 @@ function initializeApp() {
             }
 
             const main = runBacktest(
-                this.historicalData, 50, 5, 100
-            );
+    this.historicalData, 50, 5, windowSize
+);
 
-            const stars = this.starsHistoricalData.length > 30
-                ? runBacktest(this.starsHistoricalData, 12, 2, 100)
-                : null;
+           const stars = this.starsHistoricalData.length > 30
+    ? runBacktest(this.starsHistoricalData, 12, 2, windowSize)
+    : null;
 
             const labels = {
                 classical: 'Classique',
