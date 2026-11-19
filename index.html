@@ -296,11 +296,22 @@
                 tirages disponibles, en respectant leur ordre chronologique.
             </p>
 
-            <button id="backtest-button" class="secondary">
-                Lancer le backtest
-            </button>
+            <label for="backtest-window-size">
+    Nombre de tirages à analyser :
+</label>
 
-            <div id="backtest-results"></div>
+<select id="backtest-window-size">
+    <option value="100" selected>100 derniers tirages</option>
+    <option value="200">200 derniers tirages</option>
+    <option value="300">300 derniers tirages</option>
+    <option value="500">500 derniers tirages</option>
+</select>
+
+<button id="backtest-button" class="secondary">
+    Lancer le backtest
+</button>
+
+<div id="backtest-results"></div>
         </div>
 
 
